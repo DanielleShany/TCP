@@ -16,13 +16,13 @@ struct SocketState
     time_t lastActivity; // Time of the last activity
 };
 
-const int HTTP_PORT = 80;
-const int MAX_SOCKETS = 60;
-const int EMPTY = 0;
-const int LISTEN = 1;
-const int RECEIVE = 2;
-const int IDLE = 3;
-const int SEND = 4;
+constexpr int HTTP_PORT = 80;
+constexpr int MAX_SOCKETS = 60;
+constexpr int EMPTY = 0;
+constexpr int LISTEN = 1;
+constexpr int RECEIVE = 2;
+constexpr int IDLE = 3;
+constexpr int SEND = 4;
 
 void handleHttpRequest(SocketState& socket);
 

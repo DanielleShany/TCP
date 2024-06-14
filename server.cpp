@@ -1,18 +1,20 @@
-
+#define _CRT_SECURE_NO_WARNINGS
 #include <iostream>
-#define _WINSOCK_DEPRECATED_NO_WARNINGS
 #include <winsock2.h>
 #include <string.h>
 #include <time.h>
+#include <Ws2tcpip.h> // Include for InetNtop
 #include "http_utils.h"
 
 #pragma comment(lib, "Ws2_32.lib")
+
 
 bool addSocket(SOCKET id, int what);
 void removeSocket(int index);
 void acceptConnection(int index);
 void receiveMessage(int index);
 void sendMessage(int index);
+void checkTimeouts();
 
 struct SocketState sockets[MAX_SOCKETS] = { 0 };
 int socketsCount = 0;
@@ -61,7 +63,7 @@ void main()
     }
     addSocket(listenSocket, LISTEN);
 
-    // Accept connections and handles them one by one.
+    // Accept connections and handle them one by one.
     while (true)
     {
         fd_set waitRecv;
@@ -123,6 +125,9 @@ void main()
                 }
             }
         }
+
+        // Check for timeouts
+        checkTimeouts();
     }
 
     // Closing connections and Winsock.
@@ -141,6 +146,7 @@ bool addSocket(SOCKET id, int what)
             sockets[i].recv = what;
             sockets[i].send = IDLE;
             sockets[i].len = 0;
+            sockets[i].lastActivity = time(NULL); // Initialize last activity time
             socketsCount++;
             return true;
         }
@@ -167,7 +173,10 @@ void acceptConnection(int index)
         std::cout << "HTTP Server: Error at accept(): " << WSAGetLastError() << std::endl;
         return;
     }
-    std::cout << "HTTP Server: Client " << inet_ntoa(from.sin_addr) << ":" << ntohs(from.sin_port) << " is connected." << std::endl;
+
+    wchar_t ipStr[INET_ADDRSTRLEN];
+    InetNtop(AF_INET, &from.sin_addr, ipStr, INET_ADDRSTRLEN);
+    std::cout << "HTTP Server: Client " << ipStr << ":" << ntohs(from.sin_port) << " is connected." << std::endl;
 
     // Set the socket to be in non-blocking mode.
     unsigned long flag = 1;
@@ -207,9 +216,10 @@ void receiveMessage(int index)
     else
     {
         sockets[index].buffer[len + bytesRecv] = '\0'; //add the null-terminating to make it a string
-        std::cout << "HTTP Server: Recieved: " << bytesRecv << " bytes of \"" << &sockets[index].buffer[len] << "\" message.\n";
+        std::cout << "HTTP Server: Received: " << bytesRecv << " bytes of \"" << &sockets[index].buffer[len] << "\" message.\n";
 
         sockets[index].len += bytesRecv;
+        sockets[index].lastActivity = time(NULL); // Update last activity time
 
         if (sockets[index].len > 0)
         {
@@ -232,7 +242,31 @@ void sendMessage(int index)
 
     std::cout << "HTTP Server: Sent: " << bytesSent << "\\" << sockets[index].len << " bytes of \"" << sockets[index].buffer << "\" message.\n";
 
-    sockets[index].send = IDLE;
-    sockets[index].recv = RECEIVE;
-    sockets[index].len = 0;
+    sockets[index].len -= bytesSent;
+    if (sockets[index].len > 0)
+    {
+        memmove(sockets[index].buffer, sockets[index].buffer + bytesSent, sockets[index].len);
+    }
+    else
+    {
+        sockets[index].send = IDLE;
+        sockets[index].recv = RECEIVE;
+    }
+}
+
+void checkTimeouts()
+{
+    time_t currentTime = time(NULL);
+    for (int i = 0; i < MAX_SOCKETS; i++)
+    {
+        if (sockets[i].recv != EMPTY && sockets[i].recv != LISTEN)
+        {
+            if (difftime(currentTime, sockets[i].lastActivity) > 2 * 60) // 2 minutes
+            {
+                std::cout << "HTTP Server: Closing connection due to inactivity.\n";
+                closesocket(sockets[i].id);
+                removeSocket(i);
+            }
+        }
+    }
 }
