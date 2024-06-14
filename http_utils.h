@@ -11,7 +11,7 @@ struct SocketState
     int recv;          // Receiving?
     int send;          // Sending?
     int sendSubType;   // Sending sub-type
-    char buffer[128];
+    char buffer[1024];
     int len;
     time_t lastActivity; // Time of the last activity
 };
@@ -23,6 +23,7 @@ constexpr int LISTEN = 1;
 constexpr int RECEIVE = 2;
 constexpr int IDLE = 3;
 constexpr int SEND = 4;
+constexpr int TIMEOUT = 120;
 
 void handleHttpRequest(SocketState& socket);
 

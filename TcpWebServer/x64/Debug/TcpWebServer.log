@@ -1,6 +1,3 @@
 ﻿  http_utils.cpp
-C:\Users\Dandush\source\repos\TCP\http_utils.cpp(71,35): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
-  server.cpp
-C:\Users\Dandush\source\repos\TCP\server.cpp(23,1): warning C4326: return type of 'main' should be 'int' instead of 'void'
-  Generating Code...
-  TcpWebServer.vcxproj -> C:\Users\Dandush\Source\Repos\TCP\x64\Debug\TcpWebServer.exe
+C:\Users\Dandush\source\repos\TCP\http_utils.cpp(119,35): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+  TcpWebServer.vcxproj -> C:\Users\Dandush\source\repos\TCP\x64\Debug\TcpWebServer.exe

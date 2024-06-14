@@ -83,10 +83,10 @@ void main()
         }
 
         timeval timeout;
-        timeout.tv_sec = 2 * 60; // 2 minutes
+        timeout.tv_sec = TIMEOUT;
         timeout.tv_usec = 0;
 
-        int nfd = select(0, &waitRecv, &waitSend, NULL, &timeout);
+         int nfd = select(0, &waitRecv, &waitSend, NULL, &timeout);
         if (nfd == SOCKET_ERROR)
         {
             std::cout << "HTTP Server: Error at select(): " << WSAGetLastError() << std::endl;
@@ -261,7 +261,7 @@ void checkTimeouts()
     {
         if (sockets[i].recv != EMPTY && sockets[i].recv != LISTEN)
         {
-            if (difftime(currentTime, sockets[i].lastActivity) > 2 * 60) // 2 minutes
+            if (difftime(currentTime, sockets[i].lastActivity) > TIMEOUT) 
             {
                 std::cout << "HTTP Server: Closing connection due to inactivity.\n";
                 closesocket(sockets[i].id);

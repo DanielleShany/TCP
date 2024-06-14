@@ -2,7 +2,7 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>C:\Users\Dandush\Source\Repos\TCP\x64\Debug\TcpWebServer.exe</FullPath>
+      <FullPath>C:\Users\Dandush\source\repos\TCP\x64\Debug\TcpWebServer.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles />
